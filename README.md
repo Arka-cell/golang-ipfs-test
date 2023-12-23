@@ -33,4 +33,5 @@ Run your Go app with the following command:
 
     go run . --user=$DATABASE_USER --password=$DATABASE_PASSWORD --database=$DATABSE_NAME
 
+
 Once finished, check json_result.json which will show all data from the table messages as json, but it will also show their IPFS and resolved IPNS. 
