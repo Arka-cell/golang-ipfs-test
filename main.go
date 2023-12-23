@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"time"
 
 	Tables "github.com/arka-cell/ummatest/tables"
 	"github.com/go-sql-driver/mysql"
@@ -16,12 +17,14 @@ import (
 
 var db *sql.DB
 
+const publicKey = "k51qzi5uqu5dl5fxijerttgnvu7b7vuyxvnmwdqla7cwwaubo8xqqskiqokqex"
+
 func main() {
 	// Define command-line flags
 	user := flag.String("user", "my_user", "MySQL user")
 	password := flag.String("password", "my_password", "MySQL password")
 	database := flag.String("database", "my_database", "MySQL database")
-	host := flag.String("host", "127.0.0.1", "MySQL host")
+	host := flag.String("host", "db", "MySQL host")
 	port := flag.String("port", "3306", "MySQL port")
 	table := flag.String("table", "messages", "Table Name")
 
@@ -41,7 +44,13 @@ func main() {
 	// Get a database handle.
 	var err error
 	db, err = sql.Open("mysql", cfg.FormatDSN())
-	sh := shell.NewShell("localhost:5001")
+	defer db.Close()
+	if pingErr := db.Ping(); pingErr != nil {
+		log.Fatal(pingErr)
+	}
+	fmt.Printf("Connecting to database %s with %s\n", *database, *user)
+
+	sh := shell.NewShell("ipfs:5001")
 	fmt.Println(sh)
 	if err != nil {
 		log.Fatal(err)
@@ -62,30 +71,40 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	jsonData, err := json.MarshalIndent(messages, "", "  ")
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf(string(jsonData))
-	fmt.Printf(string(jsonData[0]))
-
-	for i := 0; i < len(messages); i++ {
-
-		ipfsHash, err := interactWithIPFS(string(jsonData[i]), sh)
+	var ipfsHashes []string
+	var ipnsHashes []string
+	for i := range messages {
+		message, err := json.Marshal(messages[i])
 		if err != nil {
+			fmt.Println(err)
 			return
 		}
-		fmt.Printf("IPFS Data is: %s \n", string(jsonData[i]))
-		fmt.Printf("IPFS Hash is: %s \n", ipfsHash)
+
+		ipfsHash, err := getCID(string(message), sh)
+		fmt.Printf("IPFS Hash for row with ID %x is: %s \n", messages[i].ID, ipfsHash)
+		ipfsHashes = append(ipfsHashes, ipfsHash)
+		err = addToIPNS(ipfsHash, sh)
+		if err != nil {
+			fmt.Println(err)
+		}
+		ipnsResolve, err := resolveIPNS(sh)
+		if err != nil {
+			fmt.Println(err)
+		}
+		fmt.Printf("IPNS Hash to edit row with ID %x is: %s \n", messages[i].ID, ipnsResolve)
+		ipnsHashes = append(ipnsHashes, ipnsResolve)
+
+	}
+	jsonData, err := json.MarshalIndent(messages, "", "  ")
+	if err != nil {
+		log.Fatal(err)
+		fmt.Printf(string(jsonData))
 	}
 
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// chainOfHashes := buildChainOfHashes(ipfsCID, columns)
-	// fmt.Println("Chain of Hashes:", chainOfHashes)
+	fmt.Println("This Docker image will now exit Gracefully!")
 }
 
 func getColumnNamesAndTypes(tableName string) (map[string]string, error) {
@@ -131,11 +150,7 @@ func getMessages() ([]Tables.Message, error) {
 }
 
 // interactWithIPFS interacts with IPFS to add data and obtain CID
-func interactWithIPFS(data string, sh *shell.Shell) (string, error) {
-	// Placeholder for IPFS interaction
-	// You need to implement this based on your actual IPFS setup
-	// This might involve using an IPFS library, API, or command-line interface
-	// Return the obtained CID
+func getCID(data string, sh *shell.Shell) (string, error) {
 	ipfsHash, err := sh.Add(strings.NewReader(string(data)))
 	if err != nil {
 		return "", err
@@ -144,12 +159,14 @@ func interactWithIPFS(data string, sh *shell.Shell) (string, error) {
 	return ipfsHash, nil
 }
 
-// buildChainOfHashes builds a chain of hashes based on the IPFS CID and column names
-func buildChainOfHashes(ipfsCID string, columns map[string]string) string {
-	// Placeholder for building a chain of hashes
-	// Customize this based on your actual requirements
-	// You might use a hashing algorithm (e.g., SHA-256) on the IPFS CID and column names
-	// to create a chain of hashes
-	// Return the resulting chain of hashes
-	return "YourChainOfHashesHere"
+func addToIPNS(ipfs string, sh *shell.Shell) error {
+	var lifetime time.Duration = 50 * time.Hour
+	var ttl time.Duration = 1 * time.Microsecond
+	_, err := sh.PublishWithDetails(ipfs, publicKey, lifetime, ttl, true)
+
+	return err
+}
+
+func resolveIPNS(sh *shell.Shell) (string, error) {
+	return sh.Resolve(publicKey)
 }

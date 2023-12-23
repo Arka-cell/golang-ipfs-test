@@ -10,9 +10,4 @@ COPY . .
 COPY .env .
 RUN go get -d -v ./...
 RUN go install -v ./...
-RUN go build -o /build
-# RUN go get -u github.com/go-sql-driver/mysql
-# RUN go get -u github.com/ipfs/go-ipfs-api
-EXPOSE 8080
-# Run the executable
-CMD [ "/build" ]
+EXPOSE 3306
