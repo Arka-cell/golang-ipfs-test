@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "sender_id": 1,
+    "receiver_id": 2,
+    "text": "Hello, how are you?",
+    "created_at": "2023-12-23 17:43:52",
+    "updated_at": "2023-12-23 17:43:52",
+    "ipns": "/ipfs/Qmcu16GKRirVfL2SjiAwMkCMp1SHvhSd2afVmSebj7A3uG",
+    "ipfs": "Qmcu16GKRirVfL2SjiAwMkCMp1SHvhSd2afVmSebj7A3uG"
+  },
+  {
+    "id": 2,
+    "sender_id": 2,
+    "receiver_id": 1,
+    "text": "I am good, thanks!",
+    "created_at": "2023-12-23 17:43:52",
+    "updated_at": "2023-12-23 17:43:52",
+    "ipns": "/ipfs/QmPVCUZ6L6387goTSfDQw1AvLR5TpcNKeu5Z5nEsHC5f6Z",
+    "ipfs": "QmPVCUZ6L6387goTSfDQw1AvLR5TpcNKeu5Z5nEsHC5f6Z"
+  },
+  {
+    "id": 3,
+    "sender_id": 3,
+    "receiver_id": 1,
+    "text": "Meeting at 3 PM today",
+    "created_at": "2023-12-23 17:43:52",
+    "updated_at": "2023-12-23 17:43:52",
+    "ipns": "/ipfs/Qmb7MXutbsFmbkX12X2a1sg3UP551nfi8Ys91pQbsVz3gh",
+    "ipfs": "Qmb7MXutbsFmbkX12X2a1sg3UP551nfi8Ys91pQbsVz3gh"
+  },
+  {
+    "id": 4,
+    "sender_id": 1,
+    "receiver_id": 3,
+    "text": "Sure, I will be there",
+    "created_at": "2023-12-23 17:43:52",
+    "updated_at": "2023-12-23 17:43:52",
+    "ipns": "/ipfs/QmQjd8pYY1nwMxkpM4gxVf4TzZwiQQKCCgLhBDZyDeA85m",
+    "ipfs": "QmQjd8pYY1nwMxkpM4gxVf4TzZwiQQKCCgLhBDZyDeA85m"
+  },
+  {
+    "id": 5,
+    "sender_id": 2,
+    "receiver_id": 3,
+    "text": "Don not forget to bring the documents",
+    "created_at": "2023-12-23 17:43:52",
+    "updated_at": "2023-12-23 17:43:52",
+    "ipns": "/ipfs/QmXr2KxMX4653p5S6Wz4RHRkv4ujXJPjY9DcsB5VovtqgT",
+    "ipfs": "QmXr2KxMX4653p5S6Wz4RHRkv4ujXJPjY9DcsB5VovtqgT"
+  },
+  {
+    "id": 6,
+    "sender_id": 3,
+    "receiver_id": 2,
+    "text": "Okay, got it",
+    "created_at": "2023-12-23 17:43:52",
+    "updated_at": "2023-12-23 17:43:52",
+    "ipns": "/ipfs/QmZ47fdzYFXpCUTWfYBXE6kFAYqLbBhHhyr8BxWcBNmVjB",
+    "ipfs": "QmZ47fdzYFXpCUTWfYBXE6kFAYqLbBhHhyr8BxWcBNmVjB"
+  }
+]

@@ -11,15 +11,3 @@ services:
       - "127.0.0.1:3306:3306"
     volumes:
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
-
-  # app:
-  #   image: app 
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile
-  #   env_file: .env
-  #   links:
-  #     - "db:database"
-  #   depends_on:
-  #     - db
-  #   command: "go run . --user=$MYSQL_USER --password=$MYSQL_PASSWORD --database=$MYSQL_DATABASE"

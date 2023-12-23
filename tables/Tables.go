@@ -8,4 +8,6 @@ type Message struct {
 	Text       string `json:"text"`
 	CreatedAt  string `json:"created_at"`
 	UpdatedAt  string `json:"updated_at"`
+	IPNS       string `json:"ipns"`
+	IPFS       string `json:"ipfs"`
 }

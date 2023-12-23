@@ -5,7 +5,9 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -13,25 +15,21 @@ import (
 	"github.com/go-sql-driver/mysql"
 	_ "github.com/go-sql-driver/mysql"
 	shell "github.com/ipfs/go-ipfs-api"
+	"github.com/joho/godotenv"
 )
 
 var db *sql.DB
 
-const publicKey = "k51qzi5uqu5dl5fxijerttgnvu7b7vuyxvnmwdqla7cwwaubo8xqqskiqokqex"
+var IPNSPublishingKey string
 
 func main() {
-	// Define command-line flags
 	user := flag.String("user", "my_user", "MySQL user")
 	password := flag.String("password", "my_password", "MySQL password")
 	database := flag.String("database", "my_database", "MySQL database")
-	host := flag.String("host", "db", "MySQL host")
+	host := flag.String("host", "127.0.0.1", "MySQL host")
 	port := flag.String("port", "3306", "MySQL port")
 	table := flag.String("table", "messages", "Table Name")
-
-	// Parse the command-line arguments
 	flag.Parse()
-
-	// Capture connection properties.
 	cfg := mysql.Config{
 		User:                 *user,
 		Passwd:               *password,
@@ -40,8 +38,6 @@ func main() {
 		DBName:               *database,
 		AllowNativePasswords: true,
 	}
-
-	// Get a database handle.
 	var err error
 	db, err = sql.Open("mysql", cfg.FormatDSN())
 	defer db.Close()
@@ -50,8 +46,8 @@ func main() {
 	}
 	fmt.Printf("Connecting to database %s with %s\n", *database, *user)
 
-	sh := shell.NewShell("ipfs:5001")
-	fmt.Println(sh)
+	sh := shell.NewShell("127.0.0.1:5001")
+	fmt.Println("Connecting to IPFS Shell")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -61,6 +57,11 @@ func main() {
 		log.Fatal(pingErr)
 	}
 	fmt.Printf("Connecting to database %s with %s\n", *database, *user)
+	err = godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+	IPNSPublishingKey = os.Getenv("IPNS_PUBLISH_KEY")
 
 	columns, err := getColumnNamesAndTypes(*table)
 	if err != nil {
@@ -93,20 +94,21 @@ func main() {
 		}
 		fmt.Printf("IPNS Hash to edit row with ID %x is: %s \n", messages[i].ID, ipnsResolve)
 		ipnsHashes = append(ipnsHashes, ipnsResolve)
-
+		messages[i].IPNS = ipnsResolve
+		messages[i].IPFS = ipfsHash
 	}
 	jsonData, err := json.MarshalIndent(messages, "", "  ")
+	saveJSONToFile("json_result.json", string(jsonData))
 	if err != nil {
 		log.Fatal(err)
-		fmt.Printf(string(jsonData))
 	}
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("This Docker image will now exit Gracefully!")
 }
 
+// Get the column names and their types for the table message in MySQL
 func getColumnNamesAndTypes(tableName string) (map[string]string, error) {
 	columns := make(map[string]string)
 
@@ -128,7 +130,7 @@ func getColumnNamesAndTypes(tableName string) (map[string]string, error) {
 	return columns, nil
 }
 
-// getMessages retrieves all rows from the 'messages' table
+// getMessages retrieves all rows from the 'messages' table in MySQL
 func getMessages() ([]Tables.Message, error) {
 	var messages []Tables.Message
 
@@ -162,11 +164,21 @@ func getCID(data string, sh *shell.Shell) (string, error) {
 func addToIPNS(ipfs string, sh *shell.Shell) error {
 	var lifetime time.Duration = 50 * time.Hour
 	var ttl time.Duration = 1 * time.Microsecond
-	_, err := sh.PublishWithDetails(ipfs, publicKey, lifetime, ttl, true)
+	_, err := sh.PublishWithDetails(ipfs, IPNSPublishingKey, lifetime, ttl, true)
 
 	return err
 }
 
 func resolveIPNS(sh *shell.Shell) (string, error) {
-	return sh.Resolve(publicKey)
+	return sh.Resolve(IPNSPublishingKey)
+}
+
+func saveJSONToFile(filename string, jsonData string) error {
+	jsonBytes := []byte(jsonData)
+	err := ioutil.WriteFile(filename, jsonBytes, 0644)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
