@@ -1,8 +1,8 @@
 ### Dependencies:
 Setup your database with Docker:
 <ol>
-    <li>Populate your .env file with your environment variables.
-    <li>Run `docker-compose up`. This will create a database for you with MySQL and will automatically create a table called messages to serialize into JSON as well as seed it with dummy data.
+    <li>Populate your .env file with your environment variables or leave it as it is.
+    <li>Run `docker-compose up`. This will create a database for you with MySQL and will automatically create a table called messages to serialize into JSON as well as seed it with some dummy data.
 </ol>
 Install IPFS:
 <ol>
